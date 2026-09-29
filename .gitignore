@@ -1,0 +1,5 @@
+.venv/
+*.mp4
+laboratorio/evidencias_ecoguard/
+**/__pycache__/
+*claves.py

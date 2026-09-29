@@ -1,9 +1,8 @@
 import requests
 from datetime import datetime
+from claves import DISCORD_WEBHOOK_URL as WEBHOOK_URL
 
-#Direccion del canal
 
-WEBHOOK_URL = "https://discord.com/api/webhooks/1554593637285765310/dW1R1ebTcM6yR2cMukHq3IZKNs8j4OKWn_S5czzyoYh6jkeecYedjE9ifEaSAbBeQY7p"
 
 def enviar_alerta_discord(especie, ruta_foto):
     hora_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

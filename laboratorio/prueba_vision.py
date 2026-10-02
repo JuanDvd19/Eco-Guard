@@ -82,6 +82,24 @@ while True:
                 print(f"Evidencia guardada en: {ruta_foto}")
                 
                 enviar_alerta_discord(especie_confirmada, ruta_foto)
+
+                #Este bloque es para decirle al codigo donde se encuentra y que vaya subiendo hasta encontrar la carpeta raiz y ahi guardar el historial
+                ruta_script = os.path.abspath(__file__)
+                directorio_laboratorio = os.path.dirname(ruta_script)
+                directorio_raiz = os.path.dirname(directorio_laboratorio)
+                ruta_historial = os.path.join(directorio_raiz, "historial_ecoguard.txt")
+                
+                nombre_dispositivo = "EcoGuard-Cam01"
+                zona_monitoreo = "Sector Norte"
+                nivel_alerta = "Prioridad Alta" if especie_confirmada == "Zorro Rojo" else "Estandar"
+                
+                registro_linea = f"{nombre_dispositivo}, {especie_confirmada}, {zona_monitoreo}, {nivel_alerta}\n"
+                
+                with open(ruta_historial, mode="a", encoding="utf-8") as archivo_historial:
+                    archivo_historial.write(registro_linea)
+                
+                print(f"Registro guardado exitosamente en: {ruta_historial}")
+                
                 foto_evidencia_tomada = True
 
         cv2.rectangle(frame_anotado, (x1, y1), (x2, y2), color, 3)

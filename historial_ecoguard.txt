@@ -4,3 +4,4 @@ Rosa (Lorito) - Zona: Norte
 Cesar (Leon) - Zona: Norte
 Fantasma (Oso de Anteojos) - Zona: Sur
 Rayo (Puma) - Zona: Este
+EcoGuard-Cam01, Zorro Rojo, Sector Norte, Prioridad Alta

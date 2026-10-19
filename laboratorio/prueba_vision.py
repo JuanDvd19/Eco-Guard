@@ -23,7 +23,7 @@ MAX_FRAMES_MEMORIA = 45
 ruta_video = "laboratorio/video_reserva.mp4"
 cap = cv2.VideoCapture(ruta_video)
 
-clases_fauna = [15, 16, 17, 18, 19, 20, 21, 22, 23]
+clases_fauna = [14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
 
 while True:
     ret, frame = cap.read()
@@ -65,6 +65,11 @@ while True:
             print("Movimiento de fauna detectado. Analizando especie...")
 
         tiempo_total_zona = time.time() - inicio_avistamiento
+
+        if especie_confirmada is None and tiempo_total_zona >= 3.0:
+            especie_confirmada = "Animal detectado"
+            print(f"Tiempo limite alcanzado. Clasificacion generica asignada: {especie_confirmada}")
+
         x1, y1, x2, y2 = ultima_caja
 
         if especie_confirmada is None:

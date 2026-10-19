@@ -2,6 +2,8 @@ import cv2
 import os
 import time
 from datetime import datetime
+import mss
+import numpy as np
 from ultralytics import YOLO
 from agente_mensajero import enviar_alerta_discord
 
@@ -20,15 +22,32 @@ ultima_caja = None
 frames_camuflado = 0
 MAX_FRAMES_MEMORIA = 45  
 
-ruta_video = "laboratorio/video_reserva.mp4"
-cap = cv2.VideoCapture(ruta_video)
+modo_entrada = input("Seleccione modo de entrada ('1' para video, '2' para pantalla en vivo): ").strip()
+cap = None
+sct = None
+region_pantalla = None
+
+if modo_entrada == '1':
+    ruta_video = "laboratorio/video_reserva.mp4"
+    cap = cv2.VideoCapture(ruta_video)
+elif modo_entrada == '2':
+    sct = mss.mss()
+    region_pantalla = {"top": 150, "left": 100, "width": 850, "height": 500}
+else:
+    print("Modo no valido. Saliendo...")
+    exit()
 
 clases_fauna = [14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
 
 while True:
-    ret, frame = cap.read()
-    if not ret:
-        break
+    if modo_entrada == '1':
+        ret, frame = cap.read()
+        if not ret:
+            break
+    else:
+        captura_cruda = sct.grab(region_pantalla)
+        frame = np.array(captura_cruda)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
 
     frame_limpio = frame.copy()
     frame_anotado = frame.copy()
@@ -88,7 +107,6 @@ while True:
                 
                 enviar_alerta_discord(especie_confirmada, ruta_foto)
 
-                #Este bloque es para decirle al codigo donde se encuentra y que vaya subiendo hasta encontrar la carpeta raiz y ahi guardar el historial
                 ruta_script = os.path.abspath(__file__)
                 directorio_laboratorio = os.path.dirname(ruta_script)
                 directorio_raiz = os.path.dirname(directorio_laboratorio)
@@ -116,7 +134,10 @@ while True:
     if cv2.waitKey(25) & 0xFF == ord('q'):
         break
 
-cap.release()
+if cap is not None:
+    cap.release()
+if sct is not None:
+    sct.close()
 cv2.destroyAllWindows()
 
 print("\n--- REPORTE FINAL ECOGUARD ---")

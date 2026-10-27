@@ -1,14 +1,10 @@
 from ecoguard.domain.animal import Animal
-
 from ecoguard.domain.zona import Zona
-
 from ecoguard.domain.alerta import Alerta
-
-import os
-
-import csv
-
 from ecoguard.domain.agente import AgenteVigilancia
+import os
+import csv
+import matplotlib.pyplot as plt
 
 def main():
     zona_norte = Zona("Norte", "Riesgo Bajo")
@@ -26,8 +22,9 @@ def main():
         print("3. Salir del sistema")
         print("4. Activar cámara de vigilancia (Agente Autonomo)")
         print("5. Exportar historial a CSV")
+        print("6. Ver grafico de avistamientos por especie")
 
-        opcion = input("Selecciona una opción (1/2/3/4/5): ")
+        opcion = input("Selecciona una opción (1/2/3/4/5/6): ")
 
         if opcion == "1":
 
@@ -136,12 +133,48 @@ def main():
             except FileNotFoundError:
                 print("No se encontró el archivo de historial. Registra un animal primero.")
 
+        elif opcion == "6":
+            print("\n-- GENERANDO GRAFICO DE AVISTAMIENTOS --")
+            conteo_especies = {}
+
+            try:
+                with open("historial_ecoguard.txt", "r", encoding="utf-8") as archivo:
+                    for linea in archivo:
+                        linea_limpia = linea.strip()
+                        if linea_limpia:
+                            partes = linea_limpia.split(" | ")
+                            especie = None
+                            for parte in partes:
+                                if "Especie:" in parte:
+                                    especie = parte.split(":")[1].strip()
+                                    break
+                            if especie:
+                                conteo_especies[especie] = conteo_especies.get(especie, 0) + 1
+
+                if not conteo_especies:
+                    print("No se encontraron registros de especies para graficar.")
+                else:
+                    especies = list(conteo_especies.keys())
+                    cantidades = list(conteo_especies.values())
+
+                    plt.figure(figsize=(9, 5))
+                    plt.bar(especies, cantidades, color="#2E7D32", edgecolor="black")
+                    plt.title("Avistamientos por Especie - Sistema EcoGuard", fontsize=14, fontweight="bold")
+                    plt.xlabel("Especie", fontsize=12)
+                    plt.ylabel("Numero de Avistamientos", fontsize=12)
+                    plt.grid(axis="y", linestyle="--", alpha=0.7)
+                    plt.tight_layout()
+                    plt.show()
+
+            except FileNotFoundError:
+                print("No se encontro el archivo 'historial_ecoguard.txt'. Registra animales primero.")
+
         elif opcion == "3":
             print("\nCerrando el sistema EcoGuard. ¡Hasta pronto!")
             break 
 
         else:
-            print("\nOpción no válida. Por favor, elige 1, 2, 3, 4 o 5.")
+            print("\nOpción no válida. Por favor, elige 1, 2, 3, 4, 5 o 6.")
 
         input("\nPresiona Enter para continuar...")
 

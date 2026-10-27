@@ -142,13 +142,9 @@ def main():
                     for linea in archivo:
                         linea_limpia = linea.strip()
                         if linea_limpia:
-                            partes = linea_limpia.split(" | ")
-                            especie = None
-                            for parte in partes:
-                                if "Especie:" in parte:
-                                    especie = parte.split(":")[1].strip()
-                                    break
-                            if especie:
+                            partes = linea_limpia.split(",")
+                            if len(partes) >= 2:
+                                especie = partes[1].strip()
                                 conteo_especies[especie] = conteo_especies.get(especie, 0) + 1
 
                 if not conteo_especies:

@@ -78,6 +78,13 @@ while True:
     else:
         frames_camuflado += 1 
 
+    if frames_camuflado > MAX_FRAMES_MEMORIA:
+        ultima_caja = None
+        inicio_avistamiento = None
+        tiempo_total_zona = 0
+        especie_confirmada = None
+        foto_evidencia_tomada = False
+
     if ultima_caja is not None and frames_camuflado <= MAX_FRAMES_MEMORIA:
         if inicio_avistamiento is None:
             inicio_avistamiento = time.time()

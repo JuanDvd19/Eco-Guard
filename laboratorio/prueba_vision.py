@@ -53,7 +53,7 @@ while True:
     frame_anotado = frame.copy()
     caja_detectada_hoy = None
 
-    resultados_experto = cerebro_experto(frame, conf=0.15, verbose=False)
+    resultados_experto = cerebro_experto(frame, conf=0.85, verbose=False)
     if len(resultados_experto[0].boxes) > 0:
         caja_detectada_hoy = [int(coord) for coord in resultados_experto[0].boxes[0].xyxy[0]]
         

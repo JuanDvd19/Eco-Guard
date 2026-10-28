@@ -5,6 +5,8 @@ from ecoguard.domain.agente import AgenteVigilancia
 import os
 import csv
 import matplotlib.pyplot as plt
+import subprocess
+import sys
 
 def main():
     zona_norte = Zona("Norte", "Riesgo Bajo")
@@ -23,8 +25,9 @@ def main():
         print("4. Activar cámara de vigilancia (Agente Autonomo)")
         print("5. Exportar historial a CSV")
         print("6. Ver grafico de avistamientos por especie")
+        print("7. Iniciar camara de monitoreo de IA")
 
-        opcion = input("Selecciona una opción (1/2/3/4/5/6): ")
+        opcion = input("Selecciona una opción (1/2/3/4/5/6/7): ")
 
         if opcion == "1":
 
@@ -165,12 +168,27 @@ def main():
             except FileNotFoundError:
                 print("No se encontro el archivo 'historial_ecoguard.txt'. Registra animales primero.")
 
+        elif opcion == "7":
+            print("\n--- INICIANDO RADAR DE VISION ARTIFICIAL ---")
+            directorio_actual = os.path.dirname(os.path.abspath(__file__))
+            ruta_camara = os.path.join(directorio_actual, "prueba_vision.py")
+            
+            # Si no esta en la raiz, busca dentro de la carpeta laboratorio
+            if not os.path.exists(ruta_camara):
+                ruta_camara = os.path.join(directorio_actual, "laboratorio", "prueba_vision.py")
+                
+            if os.path.exists(ruta_camara):
+                subprocess.run([sys.executable, ruta_camara])
+                print("\n--- Monitoreo finalizado. Regresando al menu principal ---")
+            else:
+                print("Error: No se encontro el archivo 'prueba_vision.py'.")
+
         elif opcion == "3":
             print("\nCerrando el sistema EcoGuard. ¡Hasta pronto!")
             break 
 
         else:
-            print("\nOpción no válida. Por favor, elige 1, 2, 3, 4, 5 o 6.")
+            print("\nOpción no válida. Por favor, elige 1, 2, 3, 4, 5, 6 o 7.")
 
         input("\nPresiona Enter para continuar...")
 
@@ -178,3 +196,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

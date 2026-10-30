@@ -1,0 +1,6 @@
+streamlit
+matplotlib
+ultralytics
+opencv-python-headless
+mss
+requests

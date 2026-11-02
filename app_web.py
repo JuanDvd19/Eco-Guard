@@ -2,6 +2,7 @@ import streamlit as st
 import subprocess
 import sys
 import os 
+from base_datos import iniciar_bd, consultar_conteo_especies
 
 st.set_page_config(page_title="Ecoguard Dashboard", layout="wide") #Configura la pestaña de navegador y activa el modo ancho para aprovechar toda la pantalla.
 st.title("Panel de control Ecoguard v2.0") #Tanto title como write reemplazan el print de la consola dibujando texto directamente en la pagina web
@@ -21,17 +22,8 @@ if st.sidebar.button("Iniciar cámara de Monitoreo de IA"): #Detecta el click de
         st.sidebar.error("No se encontró el archivo de visión")
 
 st.subheader("Estadisticas de avistamientos")
-conteo_especies = {}
-
-if os.path.exists("historial_ecoguard.txt"):
-    with open("historial_ecoguard.txt", "r", encoding="utf-8") as archivo:
-        for linea in archivo:
-            linea_limpia = linea.strip()
-            if linea_limpia:
-                partes = linea_limpia.split(",")
-                if len(partes) >= 2:
-                    especie = partes[1].strip()
-                    conteo_especies[especie] = conteo_especies.get(especie, 0) + 1
+iniciar_bd() #Llama a la funcion de base_datos que crea la base de datos y la tabla 
+conteo_especies = consultar_conteo_especies() #Llama a la funcion de base_datos que consulta la tabla y devuelve un diccionario con el conteo de especies
 
 if conteo_especies: 
     col1, col2 = st.columns(2) #Divide la pantalla en dos tarjetas superiores donde metric muestra contadores con el total de animales y especies

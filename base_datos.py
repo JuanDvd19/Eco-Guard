@@ -41,6 +41,40 @@ def consultar_conteo_especies():
     conexion.close()
     return dict(resultados) # Devuelve un diccionario con la especie como clave y el conteo como valor
 
+def buscar_por_especie(especie_buscada):
+    conexion = sqlite3.connect("ecoguard.db")
+    cursor = conexion.cursor()
+
+    #WHERE filtra unicamente las filas que coinciden con especie
+    cursor.execute(
+        "SELECT id, fecha, especie FROM avistamientos WHERE especie = ?",
+        (especie_buscada,)
+    )
+    resultados = cursor.fetchall()
+    conexion.close()
+    return resultados
+
+def actualizar_especie(id_registro, nueva_especie):
+    conexion = sqlite3.connect("ecoguard.db")
+    cursor = conexion.cursor()
+    #UPDATE modifica un dato especifico usando ID unico
+    cursor.execute(
+        "UPDATE avistamientos SET especie = ? WHERE id = ?",
+        (nueva_especie, id_registro)
+    )
+    conexion.commit()
+    conexion.close()
+
+def eliminar_por_id(id_registro):
+    conexion = sqlite3.connect("ecoguard.db")
+    cursor = conexion.cursor()
+    #DELETE borra solo la fila que tenga el ID especificado
+    cursor.execute(
+        "DELETE FROM avistamientos WHERE id = ?", (id_registro,)
+    )
+    conexion.commit()
+    conexion.close()
+
 #Bloque de prueba
 if __name__ == "__main__":
     iniciar_bd()

@@ -21,6 +21,7 @@ tiempo_total_zona = 0
 ultima_caja = None
 frames_camuflado = 0
 MAX_FRAMES_MEMORIA = 45  
+CONF_RASTREO = 0.65
 
 modo_entrada = input("Seleccione modo de entrada ('1' para video, '2' para pantalla en vivo): ").strip()
 cap = None
@@ -67,7 +68,7 @@ while True:
             print(f"Confirmado por el Biologo: {especie_confirmada.upper()}")
 
     resultados_rastreo = cerebro_rastreo(
-        frame, conf=0.15, classes=clases_fauna, verbose=False
+        frame, conf=CONF_RASTREO, classes=clases_fauna, verbose=False
     )
     if caja_detectada_hoy is None and len(resultados_rastreo[0].boxes) > 0:
         caja_detectada_hoy = [int(coord) for coord in resultados_rastreo[0].boxes[0].xyxy[0]]

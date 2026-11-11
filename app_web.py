@@ -1,51 +1,134 @@
+import pandas as pd
+import sqlite3
 import streamlit as st
 import subprocess
 import sys
 import os 
 from base_datos import iniciar_bd, consultar_conteo_especies
 
-st.set_page_config(page_title="Ecoguard Dashboard", layout="wide") #Configura la pestaña de navegador y activa el modo ancho para aprovechar toda la pantalla.
-st.title("Panel de control Ecoguard v2.0") #Tanto title como write reemplazan el print de la consola dibujando texto directamente en la pagina web
-st.write("Monitoreo inteligente de fauna y análisis de datos en tiempo real.")
+if 'autenticado' not in st.session_state:
+    st.session_state['autenticado'] = False
 
-st.sidebar.header("Centro de Mando") #Sidebar crea una columna desplegable que separa los botones de las graficas en la pagina
+def pantalla_login():
+    col1, col2, col3 = st.columns([1, 2, 1]) # Crea 3 columnas para centrar el formulario
 
-if st.sidebar.button("Iniciar cámara de Monitoreo de IA"): #Detecta el click del raton y ejecuta el subproceso programado en main.py
-    directorio_actual = os.path.dirname(os.path.abspath(__file__))
-    ruta_camara = os.path.join(directorio_actual, "laboratorio", "prueba_vision.py")
+    with col2:
+        st.image("https://cdn-icons-png.flaticon.com/512/2913/2913990.png", width=80)
+        st.markdown("### 🌿 Ecoguard - Acceso")
+        st.caption("Panel de control y monitoreo inteligente")
 
-    if os.path.exists(ruta_camara):
-        st.sidebar.info("Radar activo. Presiona la tecla q en la ventana de video para cerrar")
-        subprocess.run([sys.executable, ruta_camara])
-        st.sidebar.success("Monitoreo Finalizado")
-    else:
-        st.sidebar.error("No se encontró el archivo de visión")
+        st.write("")
 
-st.subheader("Estadisticas de avistamientos")
-iniciar_bd() #Llama a la funcion de base_datos que crea la base de datos y la tabla 
-conteo_especies = consultar_conteo_especies() #Llama a la funcion de base_datos que consulta la tabla y devuelve un diccionario con el conteo de especies
+        with st.form("formulario_login"):
+            usuario = st.text_input("Usuario", placeholder="Ej: admin")
+            contrasena = st.text_input("Contraseña", type="password", placeholder="••••••••")
 
-if conteo_especies: 
-    col1, col2 = st.columns(2) #Divide la pantalla en dos tarjetas superiores donde metric muestra contadores con el total de animales y especies
-    col1.metric("Total de avistamientos", sum(conteo_especies.values()))
-    col2.metric("Especies distintas", len(conteo_especies))
+            boton_ingreso = st.form_submit_button("Iniciar sesión", use_container_width=True)
 
-    st.bar_chart(conteo_especies, color="#2E7D32") #Toma el diccionario y genera en una sola linea un grafico de barras interactivo de color verde
+            if boton_ingreso:
+                if usuario == "admin" and contrasena == "ecoguard2026":
+                    st.session_state['autenticado'] = True
+                    st.success("¡Bienvenido al sistema Ecoguard!")
+                    st.rerun()
+                else:
+                    st.error("Credenciales incorrectas")
+
+
+
+def mostrar_dashboard():
+    st.title("🌿 Panel de Monitoreo Inteligente de Fauna")
+    
+    # Aseguramos que la base de datos esté iniciada usando tu función importada
+    iniciar_bd()
+    
+    tab1, tab2, tab3 = st.tabs(["Análisis General", "Control de Cámaras", "Base de Datos"])
+    
+    with tab1:
+        st.markdown("### Resumen de Fauna Detectada")
+       
+        datos = consultar_conteo_especies() 
+        
+        if datos:
+           
+            df_conteo = pd.DataFrame(datos, columns=["Especie", "Cantidad"])
+            
+            
+            if not df_conteo.empty and df_conteo["Cantidad"].sum() > 0:
+               
+                m1, m2 = st.columns(2)
+                m1.metric(label="Total Detectados", value=int(df_conteo["Cantidad"].sum()))
+                m2.metric(label="Especie más vista", value=df_conteo.iloc[0]["Especie"])
+                
+                st.markdown("---")
+                
+                st.bar_chart(df_conteo.set_index("Especie"))
+            else:
+                st.info("Aún no hay detecciones registradas en la base de datos.")
+        else:
+            st.info("Aún no hay detecciones registradas en la base de datos.")
+      
+
+    with tab2:
+        st.subheader("Control de Visión Artificial (YOLOv8)")
+        st.write("Usa este panel para iniciar la cámara sin bloquear la página web.")
+        
+       
+        if st.button("Iniciar Detección en Tiempo Real", type="primary"):
+            
+            subprocess.Popen([sys.executable, "main.py"])
+            st.success("Cámara iniciada en una ventana externa.")
+            
+        st.markdown("---")
+        st.write("Últimas capturas:")
+        
+       
+        directorio_actual = os.path.dirname(os.path.abspath(__file__))
+
+        ruta_fotos = os.path.join(directorio_actual, "ecoguard", "laboratorio", "evidencias_ecoguard")
+        
+        if os.path.exists(ruta_fotos):
+            fotos = os.listdir(ruta_fotos)
+            if fotos:
+                cols = st.columns(3)
+                for i, foto in enumerate(fotos[-6:]): # Muestra solo las últimas 6
+                    cols[i % 3].image(os.path.join(ruta_fotos, foto), use_container_width=True)
+            else:
+                st.warning("La carpeta de capturas está vacía.")
+        else:
+            st.warning(f"No se encontró la carpeta '{ruta_fotos}'.")
+
+    with tab3:
+        st.subheader("Registros Históricos")
+        try:
+            # CAMBIA "ecoguard.db" y "avistamientos" por los nombres reales de tu BD y tu tabla
+            conexion = sqlite3.connect("ecoguard.db") 
+            df_fauna = pd.read_sql_query("SELECT * FROM avistamientos ORDER BY id DESC", conexion)
+            
+            # Muestra la tabla profesional
+            st.dataframe(df_fauna, use_container_width=True, hide_index=True)
+            
+            # Botón de descarga CSV
+            st.markdown("---")
+            csv = df_fauna.to_csv(index=False).encode('utf-8')
+            st.download_button(" Descargar Reporte (CSV)", data=csv, file_name='reporte_ecoguard.csv', mime='text/csv')
+            conexion.close()
+            
+        except Exception as e:
+            st.error(f"Error conectando a la base de datos: Verifica el nombre del archivo .db. Detalle: {e}")
+
+    # Botón para cerrar sesión (Barra lateral)
+    st.sidebar.markdown("---")
+    if st.sidebar.button("Cerrar Sesión"):
+        st.session_state['autenticado'] = False
+        st.rerun()
+
+    
+
+
+if not st.session_state['autenticado']:
+    pantalla_login()
 else:
-    st.warning("Aun no hay registros validos en el historial")
+    mostrar_dashboard()
 
-
-st.subheader("Galeria de Evidencias recientes")
-carpeta_fotos = os.path.join("laboratorio", "evidencias_ecoguard")
-
-if os.path.exists(carpeta_fotos):
-    fotos = [f for f in os.listdir(carpeta_fotos) if f.endswith(".jpg")]
-    if fotos:
-        columnas_galeria = st.columns(3)
-        for i, foto in enumerate(fotos[-6:]): #Selecciona automaticamente las ultimas seis capturas para mantener la apgina rapida y ordenada
-            ruta_foto = os.path.join(carpeta_fotos, foto)
-            columnas_galeria [i % 3].image(ruta_foto, caption=foto)
-    else:
-        st.info("Todavia no hay fotos guardadas en la carpeta de evidencias.")
 
     

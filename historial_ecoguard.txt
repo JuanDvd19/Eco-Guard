@@ -8,3 +8,5 @@ EcoGuard-Cam01, Zorro Rojo, Sector Norte, Prioridad Alta
 EcoGuard-Cam01, Zorro Rojo, Sector Norte, Prioridad Alta
 EcoGuard-Cam01, Animal detectado, Sector Norte, Estandar
 EcoGuard-Cam01, Animal detectado, Sector Norte, Estandar
+EcoGuard-Cam01, Animal detectado, Sector Norte, Estandar
+EcoGuard-Cam01, Animal detectado, Sector Norte, Estandar
